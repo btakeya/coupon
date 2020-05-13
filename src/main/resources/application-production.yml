@@ -1,0 +1,9 @@
+profile: production
+
+logging:
+  level:
+    root: INFO
+    com.btakeya: DEBUG
+  pattern:
+    console: "%clr(%-5level) %clr(%d{yyyy-MM-dd HH:mm:ss}){faint} %clr([%thread]){magenta} %clr(%logger{36}:%line){cyan} - %msg%n"
+    file: "%clr(%-5level) %clr(%d{yyyy-MM-dd HH:mm:ss}){faint} %clr([%thread]){magenta} %clr(%logger{36}:%line){cyan} - %msg%n"
