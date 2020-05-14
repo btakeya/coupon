@@ -1,12 +1,10 @@
 package com.btakeya.coupon
 
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration
 import org.springframework.boot.autoconfigure.SpringBootApplication
-import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
 import org.springframework.boot.runApplication
 import org.springframework.web.reactive.config.EnableWebFlux
 
-@SpringBootApplication(exclude = [DataSourceAutoConfiguration::class])
+@SpringBootApplication
 @EnableWebFlux
 class CouponApplication
 

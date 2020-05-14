@@ -7,3 +7,23 @@ logging:
   pattern:
     console: "%clr(%-5level) %clr(%d{yyyy-MM-dd HH:mm:ss}){faint} %clr([%thread]){magenta} %clr(%logger{36}:%line){cyan} - %msg%n"
     file: "%clr(%-5level) %clr(%d{yyyy-MM-dd HH:mm:ss}){faint} %clr([%thread]){magenta} %clr(%logger{36}:%line){cyan} - %msg%n"
+
+
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/coupon?serverTimezone=UTC&characterEncoding=UTF-8
+    username: user
+    password: qwe123
+    hikari:
+      maximumPoolSize: 5
+
+  jpa:
+    database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
+    open-in-view: false
+    show-sql: true
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        format_sql: true
