@@ -7,7 +7,7 @@ import org.springframework.web.reactive.function.server.ServerResponse
 import reactor.core.publisher.Mono
 
 @Component
-class CouponRouterHandler(val couponDomainService: CouponDomainService) {
+class CouponHandler(val couponDomainService: CouponDomainService) {
 
     companion object: LogUtil()
 

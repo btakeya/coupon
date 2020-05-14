@@ -1,6 +1,6 @@
 package com.btakeya.coupon.config
 
-import com.btakeya.coupon.router.CouponRouterHandler
+import com.btakeya.coupon.router.CouponHandler
 import com.btakeya.coupon.router.HelloHandler
 import io.mockk.MockKAnnotations
 import io.mockk.every
@@ -19,7 +19,7 @@ class CouponRouterConfigSpec {
     private lateinit var helloHandler: HelloHandler
 
     @RelaxedMockK
-    private lateinit var couponHandler: CouponRouterHandler
+    private lateinit var couponHandler: CouponHandler
 
     private lateinit var client: WebTestClient
 

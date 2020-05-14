@@ -1,9 +1,9 @@
 package com.btakeya.coupon.config
 
-import com.btakeya.coupon.router.CouponRouterHandler
-import com.btakeya.coupon.router.CouponRouterHandler.CouponAssignParam
-import com.btakeya.coupon.router.CouponRouterHandler.CouponBulkAssignParam
-import com.btakeya.coupon.router.CouponRouterHandler.CouponIssueParam
+import com.btakeya.coupon.router.CouponHandler
+import com.btakeya.coupon.router.CouponHandler.CouponAssignParam
+import com.btakeya.coupon.router.CouponHandler.CouponBulkAssignParam
+import com.btakeya.coupon.router.CouponHandler.CouponIssueParam
 import com.btakeya.coupon.router.HelloHandler
 import javassist.NotFoundException
 import org.springframework.context.annotation.Bean
@@ -19,7 +19,7 @@ import org.springframework.web.reactive.function.server.router
 class CouponRouterConfig : WebFluxConfigurer {
 
     @Bean
-    fun route(helloHandler: HelloHandler, couponHandler: CouponRouterHandler): RouterFunction<ServerResponse> = router {
+    fun route(helloHandler: HelloHandler, couponHandler: CouponHandler): RouterFunction<ServerResponse> = router {
         "/".nest {
             GET("/hello") {
                 helloHandler.hello()
