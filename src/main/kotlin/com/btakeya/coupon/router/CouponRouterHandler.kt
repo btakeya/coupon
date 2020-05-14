@@ -27,5 +27,35 @@ class CouponRouterHandler(val couponDomainService: CouponDomainService) {
             .body(result, ResultDto::class.java)
     }
 
+    fun assign(param: CouponAssignParam): Mono<ServerResponse> {
+        val result = couponDomainService.assign(param.code, param.userId)
+            .map { ResultDto("ASSIGN", "Coupon '${it.code}' is assigned to ${it.owner} successfully") }
+            .switchIfEmpty(Mono.error(RuntimeException("Coupon not found: ${param.code}")))
+
+        return ServerResponse.ok()
+            .body(result, ResultDto::class.java)
+    }
+
+    fun bulkAssign(param: CouponBulkAssignParam): Mono<ServerResponse> {
+        val result = couponDomainService.bulkAssign(param.codes, param.userId)
+            .collectList()
+            .map { ResultDto("BULK_ASSIGN", "${it.size} Coupons are assigned to ${param.userId} successfully")}
+            .switchIfEmpty(Mono.error(RuntimeException("Coupon not found: ${param.codes}"))) // TODO: handle partial error
+
+        return ServerResponse.ok()
+            .body(result, ResultDto::class.java)
+    }
+
+    fun list(includeUsed: Boolean): Mono<ServerResponse> {
+        val result = couponDomainService.list(includeUsed)
+            .collectList()
+            .map { ResultDto("LIST", "Coupons w/${if (!includeUsed) "o" else ""} include used")}
+
+        return ServerResponse.ok()
+            .body(result, ResultDto::class.java)
+    }
+
     data class CouponIssueParam(val count: Int)
+    data class CouponAssignParam(val code: String, val userId: String)
+    data class CouponBulkAssignParam(val codes: List<String>, val userId: String)
 }
