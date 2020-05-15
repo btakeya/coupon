@@ -21,7 +21,8 @@ data class Coupon(
     val issuedBy: String?,
     val issuedAt: LocalDateTime,
 
-    var used: Boolean
+    var used: Boolean,
+    var expired: Boolean
 ) {
     companion object {
         fun newCoupon(): Coupon {
@@ -29,7 +30,7 @@ data class Coupon(
         }
 
         fun newCoupon(issuer: String?): Coupon {
-            return Coupon(null, UUID.randomUUID().toString(), null, issuer, LocalDateTime.now(), false)
+            return Coupon(null, UUID.randomUUID().toString(), null, issuer, LocalDateTime.now(), false, false)
         }
     }
 
@@ -45,6 +46,11 @@ data class Coupon(
 
     fun assign(userId: String): Coupon {
         this.owner = userId
+        return this
+    }
+
+    fun expire(): Coupon {
+        this.expired = true
         return this
     }
 }

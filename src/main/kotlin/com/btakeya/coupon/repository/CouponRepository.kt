@@ -3,6 +3,7 @@ package com.btakeya.coupon.repository
 import com.btakeya.coupon.repository.entity.Coupon
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
+import java.time.LocalDateTime
 
 interface CouponRepository : JpaRepository<Coupon, Long> {
     fun findCouponByCodeAndOwnerIsNullAndUsedIsFalse(code: String): Coupon?
@@ -10,4 +11,5 @@ interface CouponRepository : JpaRepository<Coupon, Long> {
     fun findCouponsByCodeInAndUsedIsTrueOrOwnerIsNotNull(code: List<String>): List<Coupon>
     fun findCouponsByCodeInAndUsedIsFalseAndOwnerIsNull(code: List<String>): List<Coupon>
     fun findCouponsByUsedIsFalse(): List<Coupon>
+    fun findCouponsByUsedIsFalseAndIssuedAtIsBefore(issuedAt: LocalDateTime): List<Coupon>
 }
