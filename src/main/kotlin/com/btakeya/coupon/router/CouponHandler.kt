@@ -17,6 +17,10 @@ class CouponHandler(val couponDomainService: CouponDomainService) {
     }
 
     fun issue(param: CouponIssueParam): Mono<ServerResponse> {
+        if (param.count < 1) {
+            return Mono.error(RuntimeException("최소 한 개 이상 발급할 수 있습니다."))
+        }
+
         val result = couponDomainService.issue(param.count)
             .collectList()
             .map {
@@ -27,7 +31,16 @@ class CouponHandler(val couponDomainService: CouponDomainService) {
             .body(result, ResultDto::class.java)
     }
 
+    private fun isValidCouponCode(code: String): Boolean {
+        val uuidRegex = """[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}""".toRegex()
+        return uuidRegex.matchEntire(code) != null
+    }
+
     fun assign(param: CouponAssignParam): Mono<ServerResponse> {
+        if (!isValidCouponCode(param.code)) { // UUID length, ex: 3e22847e-b963-4e01-be3b-d4b346c2e99d
+            return Mono.error(RuntimeException("올바르지 않은 쿠폰 번호입니다."))
+        }
+
         val result = couponDomainService.assign(param.code, param.userId)
             .map { ResultDto("ASSIGN", "Coupon '${it.code}' is assigned to ${it.owner} successfully", it) }
             .switchIfEmpty(Mono.error(RuntimeException("Coupon not found: ${param.code}")))
