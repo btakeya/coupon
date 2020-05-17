@@ -6,21 +6,24 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
-import java.time.LocalDate
+import java.time.LocalDateTime
 
 @Component
 class CouponExpirationDomainService(val couponRepository: CouponRepository) {
 
     companion object: LogUtil()
 
-    @Scheduled(cron = "0 * * * * *") // 매일 00:00시
+//    @Scheduled(cron = "0 0 0 * * *") // 매일 00:00시
+    @Scheduled(cron = "0 * * * * *")
     fun couponExpirationCheck() = runBlocking {
         async {
             log.info("Expiration check...")
-            val now = LocalDate.now().atTime(0, 0, 0)
-            val expirationDate = now.minusDays(3) // 3일 전 00:00:00 부터
-            val expiredCouponList = couponRepository.findCouponsByUsedIsFalseAndIssuedAtIsBefore(expirationDate)
-            expiredCouponList.map { c -> c.used = true }
+//            val now = LocalDate.now().atTime(0, 0, 0)
+            val now = LocalDateTime.now()
+//            val expirationDate = now.minusDays(3) // 3일 전 00:00:00 부터
+            val expirationDate = now.minusSeconds(10) // 3일 전 00:00:00 부터
+            val expiredCouponList = couponRepository.findCouponsByUsedIsFalseAndIssuedAtIsBeforeAndExpiredIsFalse(expirationDate)
+            expiredCouponList.map { c -> c.expired = true }
             couponRepository.saveAll(expiredCouponList)
 
             if (!expiredCouponList.isEmpty()) {

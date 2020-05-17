@@ -5,11 +5,13 @@ import com.btakeya.coupon.util.LogUtil
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.server.ServerResponse
 import reactor.core.publisher.Mono
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 @Component
 class CouponHandler(val couponDomainService: CouponDomainService) {
 
-    companion object: LogUtil()
+    companion object : LogUtil()
 
     fun hello(): Mono<ServerResponse> {
         return ServerResponse.ok()
@@ -52,17 +54,41 @@ class CouponHandler(val couponDomainService: CouponDomainService) {
     fun bulkAssign(param: CouponBulkAssignParam): Mono<ServerResponse> {
         val result = couponDomainService.bulkAssign(param.codes, param.userId)
             .collectList()
-            .map { ResultDto("BULK_ASSIGN", "${it.size} Coupons are assigned to ${param.userId} successfully", it)}
+            .map { ResultDto("BULK_ASSIGN", "${it.size} Coupons are assigned to ${param.userId} successfully", it) }
             .switchIfEmpty(Mono.error(RuntimeException("Coupon not found: ${param.codes}"))) // TODO: handle partial error
 
         return ServerResponse.ok()
             .body(result, ResultDto::class.java)
     }
 
-    fun list(includeUsed: Boolean): Mono<ServerResponse> {
-        val result = couponDomainService.list(includeUsed)
+    fun list(includeUsed: Boolean, includeExpired: Boolean): Mono<ServerResponse> {
+        val result = couponDomainService.list(includeUsed, includeExpired)
             .collectList()
-            .map { ResultDto("LIST", "Coupons w/${if (!includeUsed) "o" else ""} include used", it)}
+            .map { ResultDto("LIST", "Coupons w/${if (!includeUsed) "o" else ""} used, w/${if (!includeExpired) "o" else ""} expired", it) }
+
+        return ServerResponse.ok()
+            .body(result, ResultDto::class.java)
+    }
+
+    fun use(code: String, userId: String): Mono<ServerResponse> {
+        val result = couponDomainService.use(code, userId)
+            .map { ResultDto("USE", "Coupon ${code} (user: ${userId}) is used successfully", it) }
+
+        return ServerResponse.ok()
+            .body(result, ResultDto::class.java)
+    }
+
+    fun cancel(code: String, userId: String): Mono<ServerResponse> {
+        val result = couponDomainService.use(code, userId)
+            .map { ResultDto("CANCEL", "Coupon ${code} (user: ${userId}) is canceled successfully", it) }
+
+        return ServerResponse.ok()
+            .body(result, ResultDto::class.java)
+    }
+
+    fun expiredList(basisDate: LocalDate): Mono<ServerResponse> {
+        val result = couponDomainService.getExpiredCouponByDate(basisDate)
+            .map { ResultDto("EXPIRED_LIST", "Coupons expired on ${basisDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))}", it) }
 
         return ServerResponse.ok()
             .body(result, ResultDto::class.java)

@@ -14,6 +14,7 @@ import org.springframework.web.reactive.function.BodyExtractors.toMono
 import org.springframework.web.reactive.function.server.RouterFunction
 import org.springframework.web.reactive.function.server.ServerResponse
 import org.springframework.web.reactive.function.server.router
+import java.time.LocalDate
 
 @Component
 class CouponRouterConfig : WebFluxConfigurer {
@@ -44,7 +45,21 @@ class CouponRouterConfig : WebFluxConfigurer {
                 }
                 GET("/list") { request ->
                     couponHandler.list(request.queryParam("includeUsed")
+                                           .map { it?.toBoolean() == true }.orElse(false),
+                                       request.queryParam("includeExpired")
                                            .map { it?.toBoolean() == true }.orElse(false))
+                }
+                GET("/list/expired/today") {
+                    couponHandler.expiredList(LocalDate.now())
+                }
+                GET("/list/expired/{date}") { request -> // yyyy-MM-dd
+                    couponHandler.expiredList(LocalDate.parse(request.pathVariable("date")))
+                }
+                PUT("/use/user/{userId}/code/{code}") { request ->
+                    couponHandler.use(request.pathVariable("code"), request.pathVariable("userId"))
+                }
+                PUT("/cancel/user/{userId}/code/{code}") { request ->
+                    couponHandler.cancel(request.pathVariable("code"), request.pathVariable("userId"))
                 }
             }
         }

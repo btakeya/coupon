@@ -6,10 +6,12 @@ import org.springframework.data.jpa.repository.Query
 import java.time.LocalDateTime
 
 interface CouponRepository : JpaRepository<Coupon, Long> {
-    fun findCouponByCodeAndOwnerIsNullAndUsedIsFalse(code: String): Coupon?
-    @Query("SELECT c FROM Coupon c WHERE c.code IN ?1 AND (c.used = true OR c.owner IS NOT NULL)")
-    fun findCouponsByCodeInAndUsedIsTrueOrOwnerIsNotNull(code: List<String>): List<Coupon>
-    fun findCouponsByCodeInAndUsedIsFalseAndOwnerIsNull(code: List<String>): List<Coupon>
-    fun findCouponsByUsedIsFalse(): List<Coupon>
-    fun findCouponsByUsedIsFalseAndIssuedAtIsBefore(issuedAt: LocalDateTime): List<Coupon>
+    fun findCouponByCodeAndOwnerIsNullAndUsedIsFalseAndExpiredIsFalse(code: String): Coupon?
+    fun findCouponByCodeAndOwnerAndUsedAndExpiredIsFalse(code: String, owner: String, used: Boolean): Coupon?
+    @Query("SELECT c FROM Coupon c WHERE c.code IN ?1 AND (c.used = true OR c.owner IS NOT NULL OR c.expired = true)")
+    fun findCouponsByCodeInAndUsedIsTrueOrOwnerIsNotNullOOrExpiredIsTrue(code: List<String>): List<Coupon>
+    fun findCouponsByCodeInAndUsedIsFalseAndOwnerIsNullAndExpiredIsFalse(code: List<String>): List<Coupon>
+    fun findCouponsByUsedAndExpired(used: Boolean, expired: Boolean): List<Coupon>
+    fun findCouponsByUsedIsFalseAndIssuedAtIsBeforeAndExpiredIsFalse(issuedAt: LocalDateTime): List<Coupon>
+    fun findCouponsByExpiredIsTrueAndIssuedAtBetween(start: LocalDateTime, end: LocalDateTime): List<Coupon>
 }

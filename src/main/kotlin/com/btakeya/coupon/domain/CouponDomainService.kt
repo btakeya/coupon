@@ -8,7 +8,9 @@ import org.springframework.stereotype.Component
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.core.scheduler.Schedulers
+import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.Period
 
 @Component
 class CouponDomainService(val couponRepository: CouponRepository) {
@@ -31,7 +33,7 @@ class CouponDomainService(val couponRepository: CouponRepository) {
 
     fun assign(code: String, userId: String): Mono<CouponDto> {
         return Mono.defer {
-            Mono.justOrEmpty(couponRepository.findCouponByCodeAndOwnerIsNullAndUsedIsFalse(code))
+            Mono.justOrEmpty(couponRepository.findCouponByCodeAndOwnerIsNullAndUsedIsFalseAndExpiredIsFalse(code))
         }
             .retry(3)
             .subscribeOn(Schedulers.boundedElastic())
@@ -42,12 +44,12 @@ class CouponDomainService(val couponRepository: CouponRepository) {
 
     fun bulkAssign(codes: List<String>, userId: String): Flux<CouponDto> {
         return Flux.defer {
-            Flux.fromIterable(couponRepository.findCouponsByCodeInAndUsedIsTrueOrOwnerIsNotNull(codes))
+            Flux.fromIterable(couponRepository.findCouponsByCodeInAndUsedIsTrueOrOwnerIsNotNullOOrExpiredIsTrue(codes))
         }
             .retry(3)
             .subscribeOn(Schedulers.boundedElastic())
             .flatMap { Flux.error<Coupon>(RuntimeException("이미 발급됐거나 사용한 쿠폰이 포함되어 있습니다: ${codes}"))} // TODO: handle partial error
-            .switchIfEmpty(Flux.fromIterable(couponRepository.findCouponsByCodeInAndUsedIsFalseAndOwnerIsNull(codes)))
+            .switchIfEmpty(Flux.fromIterable(couponRepository.findCouponsByCodeInAndUsedIsFalseAndOwnerIsNullAndExpiredIsFalse(codes)))
             .retry(3)
             .subscribeOn(Schedulers.boundedElastic())
             .map { it.assign(userId) }
@@ -58,9 +60,42 @@ class CouponDomainService(val couponRepository: CouponRepository) {
 
     }
 
-    fun list(includeUsed: Boolean): Flux<CouponDto> {
+    fun list(includeUsed: Boolean, includeExpired: Boolean): Flux<CouponDto> {
         return Flux.defer {
-            Flux.fromIterable(if (includeUsed) couponRepository.findAll() else couponRepository.findCouponsByUsedIsFalse())
+            Flux.fromIterable(couponRepository.findCouponsByUsedAndExpired(includeUsed, includeExpired))
+        }
+            .retry(3)
+            .subscribeOn(Schedulers.boundedElastic())
+            .map { CouponDto.fromEntity(it) }
+    }
+
+    fun use(code: String, userId: String): Mono<CouponDto> {
+        return handleUsed(code, userId, true)
+    }
+
+    fun cancel(code: String, userId: String): Mono<CouponDto> {
+        return handleUsed(code, userId, false)
+    }
+
+    private fun handleUsed(code: String, userId: String, used: Boolean): Mono<CouponDto> {
+        return Mono.defer {
+            Mono.justOrEmpty(couponRepository.findCouponByCodeAndOwnerAndUsedAndExpiredIsFalse(code, userId, used))
+        }
+            .switchIfEmpty(Mono.error(RuntimeException("사용자 ${userId}가 가진 쿠폰 ${code}을 찾을 수 없습니다.")))
+            .retry(3)
+            .subscribeOn(Schedulers.boundedElastic())
+            .map { if (used) it.use() else it.cancel() }
+            .map { couponRepository.save(it) }
+            .map { CouponDto.fromEntity(it) }
+    }
+
+    fun getExpiredCouponByDate(basisDate: LocalDate): Flux<CouponDto> {
+        val expirationPeriods = Period.ofDays(3)
+        return Flux.defer {
+            val expectedExpirationDate = basisDate.minus(expirationPeriods)
+            val expectedIssuedAtStart = expectedExpirationDate.atTime(0, 0, 0)
+            val expectedIssuedAtEnd = expectedExpirationDate.atTime(23, 59, 59)
+            Flux.fromIterable(couponRepository.findCouponsByExpiredIsTrueAndIssuedAtBetween(expectedIssuedAtStart, expectedIssuedAtEnd))
         }
             .retry(3)
             .subscribeOn(Schedulers.boundedElastic())
