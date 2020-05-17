@@ -13,8 +13,7 @@ class CouponExpirationDomainService(val couponRepository: CouponRepository) {
 
     companion object: LogUtil()
 
-//    @Scheduled(cron = "0 0 0 * * *") // 매일 00:00시
-    @Scheduled(cron = "0 * * * * *")
+    @Scheduled(cron = "0 0 0 * * *") // 매일 00:00시
     fun couponExpirationCheck() = runBlocking {
         async {
             log.info("Expiration check...")
