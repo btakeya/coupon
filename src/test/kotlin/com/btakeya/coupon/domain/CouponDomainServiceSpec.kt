@@ -66,4 +66,74 @@ class CouponDomainServiceSpec {
 
         verify(exactly = 0) { couponRepository.saveAll(any<List<Coupon>>())}
     }
+
+    @Test
+    fun `유효한 쿠폰을 사용자에게 할당 성공`() {
+        // TODO
+    }
+
+    @Test
+    fun `유효하지 않는 쿠폰을 사용자에게 할당 실패`() {
+        // TODO
+    }
+
+    @Test
+    fun `유효한 쿠폰들을 사용자에게 할당 성공`() {
+        // TODO
+    }
+
+    @Test
+    fun `유효하지 않은 쿠폰들을 사용자에게 할당 실패`() {
+        // TODO
+    }
+
+    @Test
+    fun `쿠폰 목록 조회 성공`() {
+        // TODO
+    }
+
+    @Test
+    fun `유효한 쿠폰 사용 성공`() {
+        // TODO
+    }
+
+    @Test
+    fun `이미 사용한 쿠폰 사용 실패`() {
+        // TODO
+    }
+
+    @Test
+    fun `이미 만료된 쿠폰 사용 실패`() {
+        // TODO
+    }
+
+    @Test
+    fun `존재하지 않는 쿠폰 사용 실패`() {
+        // TODO
+    }
+
+    @Test
+    fun `유효한 쿠폰 사용 취소 성공`() {
+        // TODO
+    }
+
+    @Test
+    fun `사용하지 않은 쿠폰 사용 취소 실패`() {
+        // TODO
+    }
+
+    @Test
+    fun `이미 만료된 쿠폰 사용 취소 실패`() {
+        // TODO
+    }
+
+    @Test
+    fun `존재하지 않는 쿠폰 사용 취소 실패`() {
+        // TODO
+    }
+
+    @Test
+    fun `특정 날짜로 만료된 쿠폰 목록 조회 성공`() {
+        // TODO
+    }
 }

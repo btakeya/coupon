@@ -135,7 +135,7 @@ class CouponHandlerSpec {
 
     @Disabled("assert는 모두 통과하는데 consumeWith에서 NPE 발생 - kotlin의 type inference 문제로 보임 (https://youtrack.jetbrains.com/issue/KT-5464#comment=27-2262874)")
     @Test
-    fun `존재하는 쿠폰을 사용자에게 할당 성공`() {
+    fun `유효한 쿠폰을 사용자에게 할당 성공`() {
         val couponCode = dummyCoupon.code
         val userId = dummyCoupon.owner!!
         every { couponDomainService.assign(any(), any()) } answers { Mono.just(dummyCoupon) }
@@ -164,7 +164,7 @@ class CouponHandlerSpec {
     }
 
     @Test
-    fun `실제로 존재하지 않거나 사용한 쿠폰을 사용자에게 할당 실패`() {
+    fun `유효한 쿠폰을 사용자에게 할당 실패`() {
         val usedCouponCode = "f0e8c639-70bd-46d7-91be-40a9623b9885"
         val userId = "user"
         every { couponDomainService.assign(any(), any()) } answers { Mono.error(RuntimeException("이미 발급됐거나 사용한 쿠폰입니다")) }
@@ -179,17 +179,62 @@ class CouponHandlerSpec {
     }
 
     @Test
-    fun `실제로 존재하는 쿠폰들을 사용자에게 할당 성공`() {
+    fun `유효하지 않은 쿠폰들을 사용자에게 할당 성공`() {
         // TODO
     }
 
     @Test
-    fun `실제로 존재하지 않거나 사용한 쿠폰들을 사용자에게 할당 실패`() {
+    fun `유효하지 않은 쿠폰들을 사용자에게 할당 실패`() {
         // TODO
     }
 
     @Test
     fun `쿠폰 목록 조회 성공`() {
+        // TODO
+    }
+
+    @Test
+    fun `유효한 쿠폰 사용 성공`() {
+        // TODO
+    }
+
+    @Test
+    fun `이미 사용한 쿠폰 사용 실패`() {
+        // TODO
+    }
+
+    @Test
+    fun `이미 만료된 쿠폰 사용 실패`() {
+        // TODO
+    }
+
+    @Test
+    fun `존재하지 않는 쿠폰 사용 실패`() {
+        // TODO
+    }
+
+    @Test
+    fun `유효한 쿠폰 사용 취소 성공`() {
+        // TODO
+    }
+
+    @Test
+    fun `사용하지 않은 쿠폰 사용 취소 실패`() {
+        // TODO
+    }
+
+    @Test
+    fun `이미 만료된 쿠폰 사용 취소 실패`() {
+        // TODO
+    }
+
+    @Test
+    fun `존재하지 않는 쿠폰 사용 취소 실패`() {
+        // TODO
+    }
+
+    @Test
+    fun `특정 날짜로 만료된 쿠폰 목록 조회 성공`() {
         // TODO
     }
 }

@@ -35,6 +35,7 @@ class CouponDomainService(val couponRepository: CouponRepository) {
         return Mono.defer {
             Mono.justOrEmpty(couponRepository.findCouponByCodeAndOwnerIsNullAndUsedIsFalseAndExpiredIsFalse(code))
         }
+            .switchIfEmpty(Mono.error(RuntimeException("유효한 쿠폰이 없습니다: ${code}")))
             .retry(3)
             .subscribeOn(Schedulers.boundedElastic())
             .map { it.assign(userId) }
@@ -48,7 +49,7 @@ class CouponDomainService(val couponRepository: CouponRepository) {
         }
             .retry(3)
             .subscribeOn(Schedulers.boundedElastic())
-            .flatMap { Flux.error<Coupon>(RuntimeException("이미 발급됐거나 사용한 쿠폰이 포함되어 있습니다: ${codes}"))} // TODO: handle partial error
+            .flatMap { Flux.error<Coupon>(RuntimeException("유효하지 않은 쿠폰이 포함되어 있습니다: ${codes}"))} // TODO: handle partial error (used, expired)
             .switchIfEmpty(Flux.fromIterable(couponRepository.findCouponsByCodeInAndUsedIsFalseAndOwnerIsNullAndExpiredIsFalse(codes)))
             .retry(3)
             .subscribeOn(Schedulers.boundedElastic())
@@ -81,7 +82,7 @@ class CouponDomainService(val couponRepository: CouponRepository) {
         return Mono.defer {
             Mono.justOrEmpty(couponRepository.findCouponByCodeAndOwnerAndUsedAndExpiredIsFalse(code, userId, used))
         }
-            .switchIfEmpty(Mono.error(RuntimeException("사용자 ${userId}가 가진 쿠폰 ${code}을 찾을 수 없습니다.")))
+            .switchIfEmpty(Mono.error(RuntimeException("사용자 ${userId}가 가진 유효한 쿠폰 ${code}을 찾을 수 없습니다.")))
             .retry(3)
             .subscribeOn(Schedulers.boundedElastic())
             .map { if (used) it.use() else it.cancel() }
