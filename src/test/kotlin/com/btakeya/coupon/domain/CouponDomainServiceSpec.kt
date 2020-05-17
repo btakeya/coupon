@@ -54,7 +54,7 @@ class CouponDomainServiceSpec {
 
         val slot = slot<List<Coupon>>()
         verify(exactly = 1) { couponRepository.saveAll(capture(slot)) }
-        assertThat(slot.captured.size).isEqualTo(10)
+        assertThat(slot.captured.size).isEqualTo(couponCount)
     }
 
     @Test
