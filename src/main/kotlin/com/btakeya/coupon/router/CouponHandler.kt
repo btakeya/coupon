@@ -79,7 +79,7 @@ class CouponHandler(val couponDomainService: CouponDomainService) {
     }
 
     fun cancel(code: String, userId: String): Mono<ServerResponse> {
-        val result = couponDomainService.use(code, userId)
+        val result = couponDomainService.cancel(code, userId)
             .map { ResultDto("CANCEL", "Coupon ${code} (user: ${userId}) is canceled successfully", it) }
 
         return ServerResponse.ok()
